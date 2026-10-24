@@ -1,9 +1,3 @@
-
-
-https://github.com/user-attachments/assets/7321d9eb-d644-4df8-a3a9-865727a21c28
-
-
-
 # SparkNest — condo cleaning booking (Flutter demo)
 
 SparkNest connects condo owners with independent cleaners. A client signs up, enters their condo details, picks a cleaning package and submits a booking. Every available cleaner is notified, and the first cleaner to accept gets the job.
@@ -13,9 +7,7 @@ This repository is a working demo of that core loop, built with Flutter for iOS,
 ![SparkNest demo: client and two cleaners side by side](docs/demo.png)
 
 ## Demo
-
-
-
+https://github.com/user-attachments/assets/7321d9eb-d644-4df8-a3a9-865727a21c28
 
 ## What the demo shows
 
