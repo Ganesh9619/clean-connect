@@ -6,6 +6,11 @@ This repository is a working demo of that core loop, built with Flutter for iOS,
 
 ![SparkNest demo: client and two cleaners side by side](docs/demo.png)
 
+## Demo
+
+
+
+
 ## What the demo shows
 
 **Client**
