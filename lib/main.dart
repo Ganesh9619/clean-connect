@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 
+import 'app/theme.dart';
+import 'features/demo/demo_shell.dart';
+
 void main() {
-  runApp(const MainApp());
+  runApp(const SparkNestDemo());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class SparkNestDemo extends StatelessWidget {
+  const SparkNestDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+    return MaterialApp(
+      title: 'SparkNest · Condo cleaning booking demo',
+      debugShowCheckedModeBanner: false,
+      theme: buildTheme(),
+      home: const DemoShell(),
     );
   }
 }
