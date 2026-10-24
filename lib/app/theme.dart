@@ -15,7 +15,8 @@ ThemeData buildTheme() {
       backgroundColor: scheme.surface,
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
-      titleTextStyle: base.textTheme.titleLarge?.copyWith(
+      titleTextStyle: TextStyle(
+        fontSize: 22,
         fontWeight: FontWeight.w700,
         color: scheme.onSurface,
       ),
