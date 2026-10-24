@@ -71,10 +71,6 @@ class _CleanerHomeScreenState extends State<CleanerHomeScreen>
                 .toList()
               ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
         final openCount = open.where((b) => b.isOpen).length;
-        final upcomingCount = mine
-            .where((b) => b.status == BookingStatus.accepted)
-            .length;
-
         return Scaffold(
           appBar: AppBar(
             title: Text('Hi, ${me.firstName}'),
@@ -96,7 +92,7 @@ class _CleanerHomeScreenState extends State<CleanerHomeScreen>
                     controller: _tabs,
                     tabs: [
                       Tab(text: 'Open jobs ($openCount)'),
-                      Tab(text: 'My jobs ($upcomingCount)'),
+                      Tab(text: 'My jobs (${mine.length})'),
                     ],
                   ),
                 ],
