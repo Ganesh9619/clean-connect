@@ -1,13 +1,14 @@
 # SparkNest — condo cleaning booking (Flutter demo)
 
-SparkNest connects condo owners with independent cleaners. A client signs up, enters their condo details, picks a cleaning package and submits a booking. Every available cleaner is notified, and the first cleaner to accept gets the job.
+SparkNest is an interactive prototype of a two-sided condo cleaning marketplace. A client enters their building, picks a cleaning package, and submits a booking. Available cleaners are notified, and the first cleaner to accept gets the job.
 
-This repository is a working demo of that core loop, built with Flutter for iOS, Android and web from one codebase.
-
-![SparkNest demo: client and two cleaners side by side](docs/demo.png)
+Bookings live in memory inside the running app. Closing the app, or tapping **Reset demo**, clears them. A production build would keep the same screens and swap in Firebase, described below.
 
 ## Demo
+
 https://github.com/user-attachments/assets/7321d9eb-d644-4df8-a3a9-865727a21c28
+
+The client books a clean. Maria and Ana both see the job. The first one to accept wins, and the other sees it taken.
 
 ## What the demo shows
 
@@ -28,11 +29,48 @@ https://github.com/user-attachments/assets/7321d9eb-d644-4df8-a3a9-865727a21c28
 
 **Demo view**
 
-On a wide screen, one client and two cleaners (Maria and Ana) run side by side against the same backend. On a phone-sized screen, a switcher at the top flips between the three devices. **Reset demo** clears everything.
+On a wide screen the demo shows the client, Maria, and Ana side by side. They are three screens in one app, sharing one in-memory store, so a booking shows up on both cleaner phones immediately. On a phone-sized screen, a switcher at the top flips between the three devices. **Reset demo** clears everything.
+
+## How it is built
+
+```
+lib/
+  models/           Condo, CleaningPackage, Booking, AppUser
+  data/
+    booking_repository.dart            interface used by every screen
+    in_memory_booking_repository.dart  demo store with simulated latency
+    sample_data.dart                   packages, demo cleaners, sample condo
+  session/          per-device state: signed-in user, condo, availability, banner
+  features/
+    auth/           sign up
+    client/         condo form, home with packages and bookings, booking screen
+    cleaner/        open jobs, accept, my jobs, complete
+    demo/           three-device shell, phone frame, push-style banners
+test/
+  booking_repository_test.dart   accept race, cancel and complete rules, pricing
+```
+
+- **State:** `provider` with a `ChangeNotifier` session per device.
+- **Data seam:** screens only depend on `BookingRepository`. The demo uses `InMemoryBookingRepository`, so it runs with no accounts or keys.
+- **Accept rule:** the demo lets only one accept succeed. A test fires two accepts at once and asserts exactly one wins. Two real phones need the Firestore transaction in the production section, so they cannot both win.
+
+## Production backend (next step)
+
+The demo store is intentionally in memory. The production version swaps in Firebase behind the same interface:
+
+| Demo | Production |
+|---|---|
+| `Session.signUp` | Firebase Auth (email or phone) |
+| `InMemoryBookingRepository` | `FirestoreBookingRepository` (bookings, condos, packages collections) |
+| `acceptBooking` check-and-set | Cloud Function running a Firestore transaction that only writes while status is `requested` |
+| In-app banners | Firebase Cloud Messaging, sent by a Cloud Function when a booking is created or changes status |
+| `sample_data.dart` packages | `packages` collection, editable without an app release |
+
+Out of scope for this demo: payments and cleaner payouts, chat, ratings, recurring bookings, live location, admin dashboard.
 
 ## Run it
 
-Requires the [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.47 or newer).
+Requires the [Flutter SDK](https://docs.flutter.dev/get-started/install) with Dart 3.13 or newer.
 
 ```bash
 flutter pub get
@@ -48,7 +86,7 @@ flutter run -d ios
 flutter run -d android
 ```
 
-Tip for recording on iOS: an iPad simulator in landscape shows all three phones side by side. On an iPhone simulator, use the Client / Maria / Ana switcher.
+On a wide window, or an iPad simulator in landscape, all three phones are on screen. On a phone-sized window, use the Client / Maria / Ana switcher.
 
 Run the tests:
 
@@ -56,48 +94,9 @@ Run the tests:
 flutter test
 ```
 
-Build the static web demo (for Netlify Drop, GitHub Pages or any static host):
+Build the static web demo (for Netlify Drop, GitHub Pages, or any static host):
 
 ```bash
 flutter build web --release
 # upload build/web
 ```
-
-## How it is built
-
-```
-lib/
-  models/           Condo, CleaningPackage, Booking, AppUser
-  data/
-    booking_repository.dart            backend interface used by every screen
-    in_memory_booking_repository.dart  demo backend with simulated latency
-    sample_data.dart                   packages, demo cleaners, sample condo
-  session/          per-device state: signed-in user, condo, availability, banner
-  features/
-    auth/           sign up
-    client/         condo form, home with packages and bookings, booking screen
-    cleaner/        open jobs, accept, my jobs, complete
-    demo/           three-device shell, phone frame, push-style banners
-test/
-  booking_repository_test.dart   accept race, cancel and complete rules, pricing
-```
-
-- **State:** `provider` with a `ChangeNotifier` session per device.
-- **Backend seam:** screens only depend on `BookingRepository`. The demo uses `InMemoryBookingRepository`, so it runs anywhere with no accounts or keys.
-- **Accept rule:** `acceptBooking` checks and writes the booking with no await in between, so concurrent accepts cannot both succeed. A test fires two accepts at once and asserts exactly one wins.
-
-## Production backend (next step)
-
-The demo backend is intentionally in memory. The production version swaps in Firebase behind the same interface:
-
-| Demo | Production |
-|---|---|
-| `Session.signUp` | Firebase Auth (email or phone) |
-| `InMemoryBookingRepository` | `FirestoreBookingRepository` (bookings, condos, packages collections) |
-| `acceptBooking` check-and-set | Cloud Function running a Firestore transaction that only writes while status is `requested` |
-| In-app banners | Firebase Cloud Messaging, sent by a Cloud Function when a booking is created or changes status |
-| `sample_data.dart` packages | `packages` collection, editable without an app release |
-
-iOS builds without a Mac are possible with Codemagic (cloud builds straight to TestFlight).
-
-Out of scope for this demo: payments and cleaner payouts, chat, ratings, recurring bookings, live location, admin dashboard.
